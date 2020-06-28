@@ -1,0 +1,25 @@
+# Title: Key Croc RTL-SDR Server Remover
+# Description: Uninstalls and unconfigures RTL-SDR and an rtl_tcp service to run on boot
+# Author: GlytchTech
+# Version: 1.0
+# Category: Key Croc
+#
+#
+MATCH remove
+LED SETUP
+QUACK ENTER
+QUACK STRING Checking for rtl-sdr
+QUACK ENTER\
+QUACK STRING Uninstalling rtl-sdr
+QUACK ENTER
+apt remove -y rtl-sdr && QUACK STRING Success || QUACK STRING failed
+QUACK ENTER
+QUACK STRING Disabling Service
+QUACK ENTER
+systemctl stop rtlsdr
+systemctl disable rtlsdr
+QUACK STRING Unconfiguring Service
+QUACK ENTER
+rm /etc/systemd/system/rtlsdr.service
+QUACK STRING Done
+LED FINISH

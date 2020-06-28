@@ -1,0 +1,49 @@
+# Title: Key Croc RTL-SDR Server Setup
+# Description: Installs and configures RTL-SDR and an rtl_tcp service to run on boot
+# Author: GlytchTech
+# Version: 1.0
+# Category: Key Croc
+#
+#
+MATCH install
+LED SETUP
+QUACK ENTER
+QUACK STRING Checking for rtl-sdr
+QUACK ENTER
+if ! [ "$(command -v rtl_sdr)" ]; then
+QUACK STRING Installing rtl-sdr
+QUACK ENTER
+apt update
+apt install -y rtl-sdr && QUACK STRING Success || QUACK STRING failed
+QUACK ENTER
+QUACK STRING Configuring Service
+QUACK ENTER
+cat << EOF > /etc/systemd/system/rtlsdr.service
+[Unit]
+Description=RTL-SDR Server
+
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+
+ExecStartPre=/bin/sleep 15
+ExecStart=/bin/sh -c '/usr/bin/rtl_tcp -a $(hostname -I)'
+WorkingDirectory=/home/
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+QUACK STRING Enabling Service
+QUACK ENTER
+systemctl start rtlsdr
+systemctl enable rtlsdr
+QUACK STRING Done
+else
+QUACK STRING rtl-sdr already installed
+QUACK ENTER
+fi
+LED FINISH
