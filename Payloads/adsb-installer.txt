@@ -1,0 +1,53 @@
+# Title: Key Croc ADSB Server Setup
+# Description: Installs and configures dump1090 and sets up a service to run on boot
+# Author: GlytchTech
+# Version: 1.0
+# Category: Key Croc
+#
+#
+MATCH install dump1090
+LED SETUP
+QUACK ENTER
+QUACK STRING Installing prereqs
+QUACK ENTER
+apt update
+apt install -y librtlsdr0 librtlsdr-dev pkg-config && QUACK STRING Success || QUACK STRING failed
+QUACK STRING Cloning and making repo
+QUACK ENTER
+git clone https://github.com/antirez/dump1090.git /opt/dump1090
+cd /opt/dump1090/
+make 
+if [ -f /opt/dump1090/dump1090 ]; then
+QUACK String Success
+QUACK ENTER
+QUACK STRING Creating service file
+QUACK ENTER
+cat << EOF > /etc/systemd/system/adsb.service
+[Unit]
+Description=ADS-B Server
+
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+
+ExecStartPre=/bin/sleep 15
+ExecStart=/opt/dump1090/dump1090 --interactive --net --aggressive
+WorkingDirectory=/opt/dump1090/
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+QUACK STRING Enabling Service
+QUACK ENTER
+systemctl start adsb
+systemctl enable adsb
+QUACK STRING Done
+else 
+QUACK STRING git clone and make failed
+QUACK ENTER
+fi
+LED FINISH
